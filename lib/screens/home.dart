@@ -37,11 +37,30 @@ class _HomeState extends State<Home> {
           child: ListView.builder(
               itemCount: todos.length,
               itemBuilder: (context, index) {
-                final todo = todos[index];
+                final todo = todos[index] as Map;
+                final id = todo['_id'] as String;
                 return ListTile(
                   leading: CircleAvatar(child: Text('${index + 1}')),
                   title: Text(todo['title']),
                   subtitle: Text(todo['description']),
+                  trailing: PopupMenuButton(onSelected: (value) {
+                    if (value == 'edit') {
+                      print('Edit');
+                    } else if (value == 'delete') {
+                      deleteTodo(id);
+                    }
+                  }, itemBuilder: (context) {
+                    return [
+                      PopupMenuItem(
+                        child: Text('Edit'),
+                        value: 'edit',
+                      ),
+                      PopupMenuItem(
+                        child: Text('Delete'),
+                        value: 'delete',
+                      ),
+                    ];
+                  }),
                 );
               }),
         ),
@@ -76,6 +95,32 @@ class _HomeState extends State<Home> {
         todos = result;
         isLoading = false;
       });
+    } else {
+      showMessageError('Something went wrong');
+    }
+  }
+
+  Future<void> deleteTodo(String id) async {
+    final url = 'http://api.nstack.in/v1/todos/$id';
+    final uri = Uri.parse(url);
+    final response = await http.delete(uri);
+    if (response.statusCode == 200) {
+      // delete item from todos list on the ui
+      final filtredTodo =
+          todos.where((element) => element['_id'] != id).toList();
+      setState(() {
+        todos = filtredTodo;
+      });
     } else {}
+  }
+
+  void showMessageError(msg) {
+    final snackBar = SnackBar(
+        backgroundColor: Colors.red,
+        content: Text(
+          msg,
+          style: TextStyle(color: Colors.white),
+        ));
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 }
