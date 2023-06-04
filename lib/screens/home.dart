@@ -34,35 +34,39 @@ class _HomeState extends State<Home> {
         child: Center(child: CircularProgressIndicator()),
         replacement: RefreshIndicator(
           onRefresh: fetchData,
-          child: ListView.builder(
-              itemCount: todos.length,
-              itemBuilder: (context, index) {
-                final todo = todos[index] as Map;
-                final id = todo['_id'] as String;
-                return ListTile(
-                  leading: CircleAvatar(child: Text('${index + 1}')),
-                  title: Text(todo['title']),
-                  subtitle: Text(todo['description']),
-                  trailing: PopupMenuButton(onSelected: (value) {
-                    if (value == 'edit') {
-                      navigateToEdditpage(context, todo);
-                    } else if (value == 'delete') {
-                      deleteTodo(id);
-                    }
-                  }, itemBuilder: (context) {
-                    return [
-                      PopupMenuItem(
-                        child: Text('Edit'),
-                        value: 'edit',
-                      ),
-                      PopupMenuItem(
-                        child: Text('Delete'),
-                        value: 'delete',
-                      ),
-                    ];
-                  }),
-                );
-              }),
+          child: Visibility(
+            visible: todos.isEmpty,
+            child: Center(child: Text('Noting todo')),
+            replacement: ListView.builder(
+                itemCount: todos.length,
+                itemBuilder: (context, index) {
+                  final todo = todos[index] as Map;
+                  final id = todo['_id'] as String;
+                  return ListTile(
+                    leading: CircleAvatar(child: Text('${index + 1}')),
+                    title: Text(todo['title']),
+                    subtitle: Text(todo['description']),
+                    trailing: PopupMenuButton(onSelected: (value) {
+                      if (value == 'edit') {
+                        navigateToEdditpage(context, todo);
+                      } else if (value == 'delete') {
+                        deleteTodo(id);
+                      }
+                    }, itemBuilder: (context) {
+                      return [
+                        PopupMenuItem(
+                          child: Text('Edit'),
+                          value: 'edit',
+                        ),
+                        PopupMenuItem(
+                          child: Text('Delete'),
+                          value: 'delete',
+                        ),
+                      ];
+                    }),
+                  );
+                }),
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
