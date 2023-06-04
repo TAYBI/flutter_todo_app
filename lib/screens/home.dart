@@ -45,7 +45,7 @@ class _HomeState extends State<Home> {
                   subtitle: Text(todo['description']),
                   trailing: PopupMenuButton(onSelected: (value) {
                     if (value == 'edit') {
-                      print('Edit');
+                      navigateToEdditpage(context, todo);
                     } else if (value == 'delete') {
                       deleteTodo(id);
                     }
@@ -74,11 +74,15 @@ class _HomeState extends State<Home> {
     );
   }
 
-  void navigateToAddPage(BuildContext context) {
+  Future<void> navigateToAddPage(BuildContext context) async {
     final route = MaterialPageRoute(
       builder: (context) => AddTODO(),
     );
-    Navigator.push(context, route);
+    await Navigator.push(context, route);
+    setState(() {
+      isLoading = true;
+    });
+    fetchData();
   }
 
   Future<void> fetchData() async {
@@ -122,5 +126,12 @@ class _HomeState extends State<Home> {
           style: TextStyle(color: Colors.white),
         ));
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
+
+  void navigateToEdditpage(BuildContext context, Map todo) {
+    final route = MaterialPageRoute(
+      builder: (context) => AddTODO(todo: todo),
+    );
+    Navigator.push(context, route);
   }
 }

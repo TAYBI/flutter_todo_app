@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 class AddTODO extends StatefulWidget {
-  const AddTODO({super.key});
+  final Map? todo;
+  const AddTODO({super.key, this.todo});
 
   @override
   State<AddTODO> createState() => _AddTODOState();
@@ -12,12 +13,27 @@ class AddTODO extends StatefulWidget {
 class _AddTODOState extends State<AddTODO> {
   TextEditingController titleControler = TextEditingController();
   TextEditingController descriptionControler = TextEditingController();
+  bool isEdit = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    final todo = widget.todo;
+    super.initState();
+    if (widget.todo != null) {
+      isEdit = true;
+      final title = todo!['title'];
+      final description = todo['description'];
+      titleControler.text = title;
+      descriptionControler.text = description;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Todo"),
+        title: Text(isEdit ? "Edit Todo" : "Add Todo"),
       ),
       body: ListView(padding: EdgeInsets.all(16), children: [
         TextField(
@@ -33,9 +49,40 @@ class _AddTODOState extends State<AddTODO> {
           maxLines: 8,
         ),
         SizedBox(height: 10),
-        ElevatedButton(onPressed: submitData, child: Text('Submit'))
+        ElevatedButton(
+            onPressed: isEdit ? editDATA : submitData,
+            child: Text(isEdit ? 'update' : 'Submit'))
       ]),
     );
+  }
+
+  void editDATA() async {
+    // get the data
+    final todo = widget.todo;
+    if (todo == null) {
+      return;
+    }
+    final id = todo!['_id'];
+    final text = titleControler.text;
+    final description = descriptionControler.text;
+    final body = {
+      "title": text,
+      "description": description,
+      "is_completed": false
+    };
+
+    try {
+      final url = 'http://api.nstack.in/v1/todos/$id ';
+      final uri = Uri.parse(url);
+      final response = await http.put(uri,
+          body: jsonEncode(body),
+          headers: {'Content-Type': 'application/json'});
+      print(response.statusCode);
+      showMessageSuccess('Todo updated');
+    } catch (e) {
+      print(e);
+      showMessageError('Something went wrong');
+    }
   }
 
   void submitData() async {
@@ -47,7 +94,6 @@ class _AddTODOState extends State<AddTODO> {
       "description": description,
       "is_completed": false
     };
-    print(body);
 
     final url = 'http://api.nstack.in/v1/todos';
     final uri = Uri.parse(url);
@@ -58,7 +104,6 @@ class _AddTODOState extends State<AddTODO> {
       titleControler.text = '';
       descriptionControler.text = '';
       showMessageSuccess('Todo added');
-      print(response.body);
     } else {
       showMessageError('Something went wrong');
     }
