@@ -12,6 +12,7 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  bool isLoading = true;
   List todos = [];
 
   @override
@@ -28,18 +29,22 @@ class _HomeState extends State<Home> {
       appBar: AppBar(
         title: Text('app'),
       ),
-      body: RefreshIndicator(
-        onRefresh: fetchData,
-        child: ListView.builder(
-            itemCount: todos.length,
-            itemBuilder: (context, index) {
-              final todo = todos[index];
-              return ListTile(
-                leading: CircleAvatar(child: Text('${index + 1}')),
-                title: Text(todo['title']),
-                subtitle: Text(todo['description']),
-              );
-            }),
+      body: Visibility(
+        visible: isLoading,
+        child: Center(child: CircularProgressIndicator()),
+        replacement: RefreshIndicator(
+          onRefresh: fetchData,
+          child: ListView.builder(
+              itemCount: todos.length,
+              itemBuilder: (context, index) {
+                final todo = todos[index];
+                return ListTile(
+                  leading: CircleAvatar(child: Text('${index + 1}')),
+                  title: Text(todo['title']),
+                  subtitle: Text(todo['description']),
+                );
+              }),
+        ),
       ),
       floatingActionButton: FloatingActionButton.extended(
           onPressed: () {
@@ -58,6 +63,9 @@ class _HomeState extends State<Home> {
   }
 
   Future<void> fetchData() async {
+    // setState(() {
+    //   isLoading = true;
+    // });
     final url = 'http://api.nstack.in/v1/todos?page=1&limit=10';
     final uri = Uri.parse(url);
     final response = await http.get(uri);
@@ -66,6 +74,7 @@ class _HomeState extends State<Home> {
       final result = json['items'] as List;
       setState(() {
         todos = result;
+        isLoading = false;
       });
     } else {}
   }
