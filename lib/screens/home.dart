@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:todo_app/screens/add_todo.dart';
 
 class Home extends StatelessWidget {
   const Home({super.key});
@@ -10,7 +11,19 @@ class Home extends StatelessWidget {
       appBar: AppBar(
         title: Text('app'),
       ),
-      body: Text('welcmoe'),
+      floatingActionButton: FloatingActionButton.extended(
+          onPressed: () {
+            print('pressed');
+            navigateToAddPage(context);
+          },
+          label: Text('Add Todo')),
     );
+  }
+
+  void navigateToAddPage(BuildContext context) {
+    final route = MaterialPageRoute(
+      builder: (context) => AddTODO(),
+    );
+    Navigator.push(context, route);
   }
 }
